@@ -4,16 +4,14 @@ use tera::{Context, Tera};
 
 async fn index(tera: web::Data<Tera>) -> impl Responder {
     let mut context = Context::new();
-    context.insert("name", "User");
-    let rendered = tera.render("index.html", &context).unwrap();
+    context.insert("name", "User");  // готовим передачу значений в html
+    let rendered = tera.render("index.html", &context).unwrap();  // пихаем html + контекст
     actix_web::HttpResponse::Ok().body(rendered)
 }
 
-// Новый обработчик для /about
+// пример если не нужны переменные котекстные
 async fn about(tera: web::Data<Tera>) -> impl Responder {
-    let mut context = Context::new();
-    context.insert("name", "User");
-    let rendered = tera.render("about.html", &context).unwrap();
+    let rendered = tera.render("about.html", &Context::new()).unwrap();
     actix_web::HttpResponse::Ok().body(rendered)
 }
 
@@ -23,10 +21,10 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            .service(fs::Files::new("/static", "./src/static"))  // Добавьте эту строку
-            .app_data(Data::new(tera.clone()))  // Измените эту строку
+            .service(fs::Files::new("/static", "./src/static"))
+            .app_data(Data::new(tera.clone()))
             .route("/", web::get().to(index))
-            .route("/about", web::get().to(about))  // Новый маршрут
+            .route("/about", web::get().to(about))
     })
     .bind("127.0.0.1:8000")?
     .run()
